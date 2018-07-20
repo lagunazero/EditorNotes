@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "EditorNotes",
+	"Description": "",
+	"Category": "Other",
+	"CreatedBy": "harulf",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "EditorNotes",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
+}
