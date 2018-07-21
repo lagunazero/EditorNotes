@@ -19,35 +19,36 @@ public:
 	UEditorNotesSettings(const FObjectInitializer& ObjectInitializer);
  
 	static TSubclassOf<AEditorNoteActor> GetEditorNoteActorClass();
-	static FString GetNotesLevelName();
-	static const FScrollBoxStyle& GetWidgetListStyle();
-
-	/** Sample bool property */
-	UPROPERTY(EditAnywhere, config, Category = Custom)
-	bool bSampleBool;
- 
-	/** Sample float property that requires a restart */
-	UPROPERTY(EditAnywhere, config, Category = Custom, meta = (ConfigRestartRequired = true))
-	float SampleFloatRequireRestart;
- 
-	/** Sample string list */
-	UPROPERTY(config, EditAnywhere, Category = Custom)
-	TArray<FString> SampleStringList;
- 
-	/** Or add min, max or clamp values to the settings */
-	UPROPERTY(config, EditAnywhere, Category = Custom, meta = (UIMin = 1, ClampMin = 1))
-	int32 ClampedIntSetting;
- 
-	/** We can even use asset references */
-	UPROPERTY(config, EditAnywhere, Category = Materials, meta = (AllowedClasses = "MaterialInterface"))
-	FStringAssetReference StringMaterialAssetReference;
- 
 	UPROPERTY(config, EditAnywhere, Category = "General")
 	TSubclassOf<AEditorNoteActor> EditorNoteActorClass;
 
+	static FString GetNotesLevelName();
 	UPROPERTY(config, EditAnywhere, Category = "General")
 	FString NotesLevelName;
 
+	static const FScrollBoxStyle& GetWidgetListStyle();
 	UPROPERTY(config, EditAnywhere, Category = "General")
 	FScrollBoxStyle WidgetListStyle;
+
+	/*
+	// Sample bool property
+	UPROPERTY(EditAnywhere, config, Category = Custom)
+	bool bSampleBool;
+ 
+	// Sample float property that requires a restart
+	UPROPERTY(EditAnywhere, config, Category = Custom, meta = (ConfigRestartRequired = true))
+	float SampleFloatRequireRestart;
+ 
+	// Sample string list
+	UPROPERTY(config, EditAnywhere, Category = Custom)
+	TArray<FString> SampleStringList;
+ 
+	// Or add min, max or clamp values to the settings
+	UPROPERTY(config, EditAnywhere, Category = Custom, meta = (UIMin = 1, ClampMin = 1))
+	int32 ClampedIntSetting;
+ 
+	// We can even use asset references
+	UPROPERTY(config, EditAnywhere, Category = Materials, meta = (AllowedClasses = "MaterialInterface"))
+	FStringAssetReference StringMaterialAssetReference;
+	*/
 };

@@ -1,5 +1,3 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,6 +8,9 @@
 class FToolBarBuilder;
 class FMenuBuilder;
 
+/**
+ * Main class for the module. Handles startup/shutdown, registering settings and other big picture stuff.
+ */
 class FEditorNotesModule : public IModuleInterface
 {
 public:
@@ -24,26 +25,19 @@ public:
 		return true;
 	}
 
-	/** This function will be bound to Command (by default it will bring up plugin window) */
-	void PluginButtonClicked();
-
 private:
 
+	// Settings.
 	bool HandleSettingsSaved();
 	void RegisterSettings();
 	void UnregisterSettings();
 
-	void AddToolbarExtension(FToolBarBuilder& Builder);
-	void AddMenuExtension(FMenuBuilder& Builder);
-
-	//TSharedRef<ITableRow> OnGenerateRowForList(TSharedPtr<FString> Item, const TSharedRef<STableViewBase>& OwnerTable);
-	/* The list of strings */
-	TArray<TSharedPtr<FString>> Items;
-
-	/* The actual UI list */
-	TSharedPtr< SListView< TSharedPtr<FString> > > ListViewWidget;
-
+	// Startup helper functions.
 	TSharedRef<class SDockTab> OnSpawnPluginTab(const class FSpawnTabArgs& SpawnTabArgs);
+	/** This function will be bound to Command (by default it will bring up plugin window) */
+	void PluginButtonClicked();
+	void AddMenuExtension(FMenuBuilder& Builder);
+	void AddToolbarExtension(FToolBarBuilder& Builder);
 
 private:
 	TSharedPtr<class FUICommandList> PluginCommands;

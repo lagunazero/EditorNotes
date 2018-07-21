@@ -1,5 +1,3 @@
-// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
-
 #include "EditorNotes.h"
 #include "EditorNotesStyle.h"
 #include "EditorNotesSettings.h"
@@ -9,12 +7,11 @@
 #include "ISettingsSection.h"
 #include "ISettingsContainer.h"
 #include "Widgets/Docking/SDockTab.h"
-#include "Widgets/Layout/SBox.h"
-#include "Widgets/Text/STextBlock.h"
-#include "Framework/MultiBox/MultiBoxBuilder.h"
-#include "Widgets/Views/SHeaderRow.h"
 
-static const FName EditorNotesTabName("EditorNotes");
+namespace
+{
+	const FName EditorNotesTabName("EditorNotes");
+}
 
 #define LOCTEXT_NAMESPACE "FEditorNotesModule"
 
@@ -96,8 +93,7 @@ void FEditorNotesModule::RegisterSettings()
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
 	{
 		// Create the new category
-		ISettingsContainerPtr SettingsContainer = SettingsModule->GetContainer("Project");
-
+		//ISettingsContainerPtr SettingsContainer = SettingsModule->GetContainer("Project");
 		//SettingsContainer->DescribeCategory("CustomSettings",
 		//	LOCTEXT("RuntimeWDCategoryName", "CustomSettings"),
 		//	LOCTEXT("RuntimeWDCategoryDescription", "Game configuration for the CustomSettings game module"));
@@ -131,75 +127,12 @@ void FEditorNotesModule::UnregisterSettings()
 
 TSharedRef<SDockTab> FEditorNotesModule::OnSpawnPluginTab(const FSpawnTabArgs& SpawnTabArgs)
 {
-	FText WidgetText = FText::Format(
-		LOCTEXT("WindowWidgetText", "Add code to {0} in {1} to override this window's contents"),
-		FText::FromString(TEXT("FEditorNotesModule::OnSpawnPluginTab")),
-		FText::FromString(TEXT("EditorNotes.cpp"))
-		);
-
-	//TArray< TSharedPtr<FString> > Items;
-
-
 	return SNew(SDockTab)
 		.TabRole(ETabRole::NomadTab)
 		[
 			SNew(SEditorNotesWindowWidget)
-			// Put your tab content here!
-			//SNew(SBox)
-			//.HAlign(HAlign_Fill)
-			//.VAlign(VAlign_Fill)
-			//[
-			//	//SNew(SListView< TSharedPtr<FString> >)
-			//	//.ItemHeight(24)
-			//	//.ListItemsSource(&Items)
-			//	//.OnGenerateRow(this, &FEditorNotesModule::OnGenerateRowForList)
-
-			//	SNew(SEditorNotesWindowWidget)
-
-				//SNew(STextBlock)
-				//.Text(WidgetText)
-
-		/*
-				SNew(SListView< TSharedPtr<FString> >)
-				.ItemHeight(24)
-				.ListItemsSource(&Items)
-				.OnGenerateRow(SListView< TSharedPtr<FString> >::GenerateNewWidget( this, &FEditorNotesModule::OnGenerateWidgetForList))
-				//.OnContextMenuOpening(this, &FEditorNotesModule::GetListContextMenu)
-				//.SelectionMode(this, &FEditorNotesModule::GetSelectionMode)
-				.HeaderRow
-				(
-					SNew(SHeaderRow)
-					+ SHeaderRow::Column("Name")
-					[
-						SNew(SBorder)
-						.Padding(5)
-					.Content()
-					[
-						SNew(STextBlock)
-						.Text(TEXT("Name"))
-					]
-					]
-			+ SHeaderRow::Column("Number").DefaultLabel(TEXT("Number"))
-				+ SHeaderRow::Column("TextField").DefaultLabel(TEXT("Text Field"))
-				+ SHeaderRow::Column("TextBlock").DefaultLabel(TEXT("Text Block"))
-				+ SHeaderRow::Column("AddChild").DefaultLabel(TEXT("Add Child"))
-				)
-				*/
-			//]
 		];
 }
-
-//TSharedRef<ITableRow> FEditorNotesModule::OnGenerateRowForList(TSharedPtr<FString> Item, const TSharedRef<STableViewBase>& OwnerTable)
-//{
-//	//Create the row
-//	return
-//		SNew(STableRow< TSharedPtr<FString> >, OwnerTable)
-//		.Padding(2.0f)
-//		[
-//			//SNew(STextBlock).Text(FText::FromString(*Item.Get()))
-//			SNew(STextBlock).Text(MakeShareable(new FText(FText::FromString("TEST"))))
-//		];
-//}
 
 void FEditorNotesModule::PluginButtonClicked()
 {

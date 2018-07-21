@@ -3,14 +3,123 @@
 #include "EditorNoteActor.h"
 #include "EditorNotesSettings.h"
 #include "UnrealEd.h"
-#include "EditorNotesFunctionLibrary.h"
 #include "Engine.h"
- 
+
+namespace
+{
+	const FName ListHeaderName = "Name";
+	const FName ListHeaderDate = "Date";
+	const FName ListHeaderPrio = "Prio";
+	const FName ListHeaderText = "Text";
+	const FName ListHeaderResolved = "Resolved";
+}
+
+// One comparison struct per column in the note list.
+struct FCompareItemsBase
+{
+	EColumnSortMode::Type SortMode = EColumnSortMode::None;
+
+	FCompareItemsBase(EColumnSortMode::Type SortMode)
+		: SortMode(SortMode)
+	{
+	}
+
+	FORCEINLINE bool operator()(const FNoteData::Ptr A, const FNoteData::Ptr B) const
+	{
+		check(A.IsValid());
+		check(B.IsValid());
+		check(A->NoteActor.IsValid());
+		check(B->NoteActor.IsValid());
+		return Compare(A, B);
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const
+	{
+		return true;
+	}
+};
+
+struct FCompareItemsByName : FCompareItemsBase
+{
+	FCompareItemsByName(EColumnSortMode::Type SortMode)
+	: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->GetName() > B->NoteActor->GetName())
+			: (A->NoteActor->GetName() < B->NoteActor->GetName());
+	}
+};
+
+struct FCompareItemsByText : FCompareItemsBase
+{
+	FCompareItemsByText(EColumnSortMode::Type SortMode)
+	: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->Text > B->NoteActor->Text)
+			: (A->NoteActor->Text < B->NoteActor->Text);
+	}
+};
+
+struct FCompareItemsByDate : FCompareItemsBase
+{
+	FCompareItemsByDate(EColumnSortMode::Type SortMode)
+	: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->Date > B->NoteActor->Date)
+			: (A->NoteActor->Date < B->NoteActor->Date);
+	}
+};
+
+struct FCompareItemsByPrio : FCompareItemsBase
+{
+	FCompareItemsByPrio(EColumnSortMode::Type SortMode)
+	: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->Prio > B->NoteActor->Prio)
+			: (A->NoteActor->Prio < B->NoteActor->Prio);
+	}
+};
+
+struct FCompareItemsByResolved : FCompareItemsBase
+{
+	FCompareItemsByResolved(EColumnSortMode::Type SortMode)
+	: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->bResolved > B->NoteActor->bResolved)
+			: (A->NoteActor->bResolved < B->NoteActor->bResolved);
+	}
+};
+
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SEditorNotesWindowWidget::Construct(const FArguments& args)
 {
 #if WITH_EDITOR
 
+	// Create the window widget with all of its contents.
 	ChildSlot
 	[
 		SNew(SBox)
@@ -54,9 +163,9 @@ void SEditorNotesWindowWidget::Construct(const FArguments& args)
 					SNew(SScrollBox)
 					+ SScrollBox::Slot()
 					[
-						SAssignNew(ListViewWidget, SListView<TSharedPtr<FNoteData>>)
+						SAssignNew(ListViewWidget, SListView<FNoteData::Ptr>)
 						.ItemHeight(24)
-						.ListItemsSource(&Items) //The Items array is the source of this listview
+						.ListItemsSource(&Items)
 						.SelectionMode(ESelectionMode::Single)
 						.OnSelectionChanged(this, &SEditorNotesWindowWidget::OnNoteItemSelected)
 						//.OnMouseButtonClick
@@ -64,24 +173,24 @@ void SEditorNotesWindowWidget::Construct(const FArguments& args)
 						.HeaderRow
 						(
 							SNew(SHeaderRow)
-							+ SHeaderRow::Column("Name")
-							.DefaultLabel(FText::FromString("Name"))
+							+ SHeaderRow::Column(ListHeaderName)
+							.DefaultLabel(FText::FromName(ListHeaderName))
 							.SortMode(NameSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
-							+ SHeaderRow::Column("Text")
-							.DefaultLabel(FText::FromString("Text"))
+							+ SHeaderRow::Column(ListHeaderText)
+							.DefaultLabel(FText::FromName(ListHeaderText))
 							.SortMode(TextSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
-							+SHeaderRow::Column("Date")
-							.DefaultLabel(FText::FromString("Date"))
+							+SHeaderRow::Column(ListHeaderDate)
+							.DefaultLabel(FText::FromName(ListHeaderDate))
 							.SortMode(DateSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
-							+ SHeaderRow::Column("Prio")
-							.DefaultLabel(FText::FromString("Prio"))
+							+ SHeaderRow::Column(ListHeaderPrio)
+							.DefaultLabel(FText::FromName(ListHeaderPrio))
 							.SortMode(PrioSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
-							+ SHeaderRow::Column("Resolved")
-							.DefaultLabel(FText::FromString("Resolved"))
+							+ SHeaderRow::Column(ListHeaderResolved)
+							.DefaultLabel(FText::FromName(ListHeaderResolved))
 							.SortMode(ResolvedSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
 						)
@@ -91,241 +200,70 @@ void SEditorNotesWindowWidget::Construct(const FArguments& args)
 		]
 	];
 
-
-	/*
-	TArray< TSharedPtr<FString> > Items;
- 
-	ChildSlot
-		[
-			SNew(SOverlay)
-			+ SOverlay::Slot()
-			.HAlign(HAlign_Center)
-			.VAlign(VAlign_Top)
-			[
-				SNew(STextBlock)
-				.ColorAndOpacity(FLinearColor::White)
-				.ShadowColorAndOpacity(FLinearColor::Black)
-				.ShadowOffset(FIntPoint(-1, 1))
-				.Font(FSlateFontInfo("Arial", 26))
-				.Text(FText::FromString("Main Menu"))
-			]
-			+ SOverlay::Slot()
-			.HAlign(HAlign_Right)
-			.VAlign(VAlign_Bottom)
-			[
-				SNew(SVerticalBox)
-				+ SVerticalBox::Slot()
-				[
-					SNew(SButton)
-					.Text(FText::FromString("Add note"))
-					.OnClicked(this, &SEditorNotesWindowWidget::PlayGameClicked)
-				]
-
-				//+ SVerticalBox::Slot()
-				//[
-				//	SNew(SListView< TSharedPtr<FString> >)
-				//	.ItemHeight(24)
-				//	.ListItemsSource(&Items)
-				//	.OnGenerateRow(this, &SEditorNotesWindowWidget::OnGenerateRowForList)
-				//]
-
-				//+ SVerticalBox::Slot()
-				//[
-				//	SNew(SListView< TSharedPtr<FString> >)
-				//	.ItemHeight(24)
-				//	.ListItemsSource(&Items)
-				//	//.OnGenerateRow(SListView< TSharedPtr<FString> >::GenerateNewWidget(this, &SEditorNotesWindowWidget::OnGenerateWidgetForList))
-				//	.OnGenerateRow(this, &SEditorNotesWindowWidget::OnGenerateWidgetForList)
-				//	//.OnContextMenuOpening(this, &FEditorNotesModule::GetListContextMenu)
-				//	//.SelectionMode(this, &FEditorNotesModule::GetSelectionMode)
-				//	.HeaderRow
-				//	(
-				//		SNew(SHeaderRow)
-				//		+ SHeaderRow::Column("Name")
-				//		[
-				//			SNew(SBorder)
-				//			.Padding(5)
-				//			.Content()
-				//			[
-				//				SNew(STextBlock)
-				//				.Text(FText::FromString("Name"))
-				//			]
-				//		]
-				//		+ SHeaderRow::Column("Number").DefaultLabel(FText::FromString("Number"))
-				//		+ SHeaderRow::Column("TextField").DefaultLabel(FText::FromString("Text Field"))
-				//		+ SHeaderRow::Column("TextBlock").DefaultLabel(FText::FromString("Text Block"))
-				//		+ SHeaderRow::Column("AddChild").DefaultLabel(FText::FromString("Add Child"))
-				//	)
-				//]
-			]
-		];
- */
-
 	Refresh();
 #endif
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-TSharedRef<ITableRow> SEditorNotesWindowWidget::OnGenerateRowForList(TSharedPtr<FNoteData> Item, const TSharedRef<STableViewBase>& OwnerTable)
+TSharedRef<ITableRow> SEditorNotesWindowWidget::OnGenerateRowForList(FNoteData::Ptr Item, const TSharedRef<STableViewBase>& OwnerTable)
 {
-	class SEditorNoteRowWidget : public SMultiColumnTableRow<TSharedPtr<FNoteData> >
+	// A class for the row's window widget. Could be in the header file, but only used here.
+	class SEditorNoteRowWidget : public SMultiColumnTableRow<FNoteData::Ptr >
 	{
 	public:
 		SLATE_BEGIN_ARGS(SEditorNoteRowWidget){}
 		SLATE_END_ARGS()
 
-		void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTable, TSharedPtr<FNoteData> InItem)
+		void Construct(const FArguments& InArgs, const TSharedRef<STableViewBase>& InOwnerTable, FNoteData::Ptr InItem)
 		{
 			Item = InItem;
-			SMultiColumnTableRow< TSharedPtr<FNoteData> >::Construct(FSuperRowType::FArguments(), InOwnerTable);
+			SMultiColumnTableRow< FNoteData::Ptr >::Construct(FSuperRowType::FArguments(), InOwnerTable);
 		}
 
 		TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName)
 		{
-			FString ItemText;
-			if (ColumnName == "Name")
+			// Use the column to set the content.
+			FString ItemText = "";
+			if (ColumnName.IsEqual(ListHeaderName))
 			{
 				ItemText = Item->NoteActor->GetName();
 			}
-			else if (ColumnName == "Text")
+			else if (ColumnName.IsEqual(ListHeaderText))
 			{
 				ItemText = Item->NoteActor->Text;
 			}
-			else if (ColumnName == "Date")
+			else if (ColumnName.IsEqual(ListHeaderDate))
 			{
 				ItemText = Item->NoteActor->Date.ToString();
 			}
-			else if (ColumnName == "Prio")
+			else if (ColumnName.IsEqual(ListHeaderPrio))
 			{
 				ItemText = Item->NoteActor->PrioAsString();
 			}
-			else if (ColumnName == "Resolved")
+			else if (ColumnName.IsEqual(ListHeaderResolved))
 			{
-				ItemText = Item->NoteActor->bResolved ? "X" : "";
+				ItemText = Item->NoteActor->bResolved ? "X" : FString();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Unhandled column name: %s"), *ColumnName.ToString());
 			}
 
 			return SNew(STextBlock)
 				.Text(FText::FromString(ItemText));
-				//.Font(FEditorStyle::GetFontStyle(TEXT("ShooterGame.MenuServerListFont")))
-				//.ShadowColorAndOpacity(FLinearColor::Black)
-				//.ShadowOffset(FIntPoint(-1, 1));
 		}
-		TSharedPtr<FNoteData> Item;
+		FNoteData::Ptr Item;
 	};
 
 	return SNew(SEditorNoteRowWidget, OwnerTable, Item);
 }
 
-struct FCompareItemsByName
-{
-	EColumnSortMode::Type SortMode = EColumnSortMode::None;
-
-	FCompareItemsByName(EColumnSortMode::Type SortMode)
-		: SortMode(SortMode)
-	{
-	}
-
-	FORCEINLINE bool operator()(const TSharedPtr<FNoteData> A, const TSharedPtr<FNoteData> B) const
-	{
-		check(A.IsValid());
-		check(B.IsValid());
-		check(A->NoteActor.IsValid());
-		check(B->NoteActor.IsValid());
-		return SortMode == EColumnSortMode::Descending
-			? (A->NoteActor->GetName() > B->NoteActor->GetName())
-			: (A->NoteActor->GetName() < B->NoteActor->GetName());
-	}
-};
-
-struct FCompareItemsByText
-{
-	EColumnSortMode::Type SortMode = EColumnSortMode::None;
-
-	FCompareItemsByText(EColumnSortMode::Type SortMode)
-		: SortMode(SortMode)
-	{
-	}
-
-	FORCEINLINE bool operator()(const TSharedPtr<FNoteData> A, const TSharedPtr<FNoteData> B) const
-	{
-		check(A.IsValid());
-		check(B.IsValid());
-		check(A->NoteActor.IsValid());
-		check(B->NoteActor.IsValid());
-		return SortMode == EColumnSortMode::Descending
-			? (A->NoteActor->Text > B->NoteActor->Text)
-			: (A->NoteActor->Text < B->NoteActor->Text);
-	}
-};
-
-struct FCompareItemsByDate
-{
-	EColumnSortMode::Type SortMode = EColumnSortMode::None;
-
-	FCompareItemsByDate(EColumnSortMode::Type SortMode)
-		: SortMode(SortMode)
-	{
-	}
-
-	FORCEINLINE bool operator()(const TSharedPtr<FNoteData> A, const TSharedPtr<FNoteData> B) const
-	{
-		check(A.IsValid());
-		check(B.IsValid());
-		check(A->NoteActor.IsValid());
-		check(B->NoteActor.IsValid());
-		return SortMode == EColumnSortMode::Descending
-			? (A->NoteActor->Date > B->NoteActor->Date)
-			: (A->NoteActor->Date < B->NoteActor->Date);
-	}
-};
-
-struct FCompareItemsByPrio
-{
-	EColumnSortMode::Type SortMode = EColumnSortMode::None;
-
-	FCompareItemsByPrio(EColumnSortMode::Type SortMode)
-		: SortMode(SortMode)
-	{
-	}
-
-	FORCEINLINE bool operator()(const TSharedPtr<FNoteData> A, const TSharedPtr<FNoteData> B) const
-	{
-		check(A.IsValid());
-		check(B.IsValid());
-		check(A->NoteActor.IsValid());
-		check(B->NoteActor.IsValid());
-		return SortMode == EColumnSortMode::Descending
-			? (A->NoteActor->Prio > B->NoteActor->Prio)
-			: (A->NoteActor->Prio < B->NoteActor->Prio);
-	}
-};
-
-struct FCompareItemsByResolved
-{
-	EColumnSortMode::Type SortMode = EColumnSortMode::None;
-
-	FCompareItemsByResolved(EColumnSortMode::Type SortMode)
-		: SortMode(SortMode)
-	{
-	}
-
-	FORCEINLINE bool operator()(const TSharedPtr<FNoteData> A, const TSharedPtr<FNoteData> B) const
-	{
-		check(A.IsValid());
-		check(B.IsValid());
-		check(A->NoteActor.IsValid());
-		check(B->NoteActor.IsValid());
-		return SortMode == EColumnSortMode::Descending
-			? (A->NoteActor->bResolved > B->NoteActor->bResolved)
-			: (A->NoteActor->bResolved < B->NoteActor->bResolved);
-	}
-};
-
 void SEditorNotesWindowWidget::OnRowSorted(EColumnSortPriority::Type SortPrio, const FName& ColumnName, EColumnSortMode::Type SortMode)
 {
 	UE_LOG(LogTemp, Log, TEXT("Sorting by: %s"), *ColumnName.ToString());
 	
-	if (ColumnName.IsEqual("Name"))
+	// Flip ascending/descending order depending on the most recent order in the clicked column.
+	if (ColumnName.IsEqual(ListHeaderName))
 	{
 		EColumnSortMode::Type NewSortMode = (NameSortMode.Get() == EColumnSortMode::Ascending)
 			? EColumnSortMode::Descending
@@ -333,7 +271,7 @@ void SEditorNotesWindowWidget::OnRowSorted(EColumnSortPriority::Type SortPrio, c
 		NameSortMode.Set(NewSortMode);
 		Items.Sort(FCompareItemsByName(NewSortMode));
 	}
-	else if (ColumnName.IsEqual("Text"))
+	else if (ColumnName.IsEqual(ListHeaderText))
 	{
 		EColumnSortMode::Type NewSortMode = (TextSortMode.Get() == EColumnSortMode::Ascending)
 			? EColumnSortMode::Descending
@@ -341,7 +279,7 @@ void SEditorNotesWindowWidget::OnRowSorted(EColumnSortPriority::Type SortPrio, c
 		TextSortMode.Set(NewSortMode);
 		Items.Sort(FCompareItemsByText(NewSortMode));
 	}
-	else if (ColumnName.IsEqual("Date"))
+	else if (ColumnName.IsEqual(ListHeaderDate))
 	{
 		EColumnSortMode::Type NewSortMode = (DateSortMode.Get() == EColumnSortMode::Ascending)
 			? EColumnSortMode::Descending
@@ -349,7 +287,7 @@ void SEditorNotesWindowWidget::OnRowSorted(EColumnSortPriority::Type SortPrio, c
 		DateSortMode.Set(NewSortMode);
 		Items.Sort(FCompareItemsByDate(NewSortMode));
 	}
-	else if (ColumnName.IsEqual("Prio"))
+	else if (ColumnName.IsEqual(ListHeaderPrio))
 	{
 		EColumnSortMode::Type NewSortMode = (PrioSortMode.Get() == EColumnSortMode::Ascending)
 			? EColumnSortMode::Descending
@@ -357,7 +295,7 @@ void SEditorNotesWindowWidget::OnRowSorted(EColumnSortPriority::Type SortPrio, c
 		PrioSortMode.Set(NewSortMode);
 		Items.Sort(FCompareItemsByPrio(NewSortMode));
 	}
-	else if (ColumnName.IsEqual("Resolved"))
+	else if (ColumnName.IsEqual(ListHeaderResolved))
 	{
 		EColumnSortMode::Type NewSortMode = (ResolvedSortMode.Get() == EColumnSortMode::Ascending)
 			? EColumnSortMode::Descending
@@ -371,158 +309,39 @@ void SEditorNotesWindowWidget::OnRowSorted(EColumnSortPriority::Type SortPrio, c
 	}
 
 	ListViewWidget->RequestListRefresh();
-		/*
-		if (OldSortMode == EColumnSortMode::Ascending)
-		{
-			UE_LOG(LogTemp, Log, TEXT("old ascending"));
-		}
-		else if (OldSortMode == EColumnSortMode::Descending)
-		{
-			UE_LOG(LogTemp, Log, TEXT("old descending"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Log, TEXT("old unsorted"));
-		}
-		if (NewSortMode == EColumnSortMode::Ascending)
-		{
-			UE_LOG(LogTemp, Log, TEXT("new ascending"));
-		}
-		else if (NewSortMode == EColumnSortMode::Descending)
-		{
-			UE_LOG(LogTemp, Log, TEXT("new descending"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Log, TEXT("new unsorted"));
-		}
-		*/
 }
 
-FReply SEditorNotesWindowWidget::OnAddItemButton()
+void SEditorNotesWindowWidget::OnNoteItemSelected(FNoteData::Ptr Item, ESelectInfo::Type SelectInfo)
 {
 #if WITH_EDITOR
-	//Adds a new item to the array (do whatever you want with this)
-	//Items.Add(MakeShareable(new FString("Hello 1")));
-	//Items.Add(MakeShareable(new FNoteData()));
+	if (!Item.IsValid() || !Item->NoteActor.IsValid()) return;
 
-	if (!GEditor)
+	TWeakObjectPtr<AEditorNoteActor> Actor = Item->NoteActor;
+	UE_LOG(LogTemp, Log, TEXT("Selected %s"), *Actor->GetName());
+
+	// Select note actor in editor.
+	if (GEditor)
 	{
-		UE_LOG(LogTemp, Log, TEXT("editor world"));
-		return FReply::Handled();
+		GEditor->SelectNone(false, true);
+		GEditor->SelectActor(Actor.Get(), true, true, true, true);
+		GEditor->MoveViewportCamerasToActor(*Actor.Get(), true);
 	}
-	FWorldContext& WorldContext = GEditor->GetEditorWorldContext();
-	UWorld* World = WorldContext.World();
-	if (!WorldContext.World())
-	{
-		UE_LOG(LogTemp, Log, TEXT("no world"));
-		return FReply::Handled();
-	}
-
-	TSubclassOf<AEditorNoteActor> EditorNoteActorClass = UEditorNotesSettings::GetEditorNoteActorClass();
-	if (EditorNoteActorClass.Get())
-	{
-		FString NotesLevelName = UEditorNotesSettings::GetNotesLevelName();
-		UE_LOG(LogTemp, Log, TEXT("NotesLevelName: %s"), *NotesLevelName);
-		if (!NotesLevelName.IsEmpty())
-		{
-			const FString PersistentLevelName = UGameplayStatics::GetCurrentLevelName(World);
-			UE_LOG(LogTemp, Log, TEXT("PersistentLevelName: %s"), *PersistentLevelName);
-			NotesLevelName = PersistentLevelName + NotesLevelName;
-		}
-
-		UE_LOG(LogTemp, Log, TEXT("got as subclass"));
-		AActor* SpawnedActor = UEditorNotesFunctionLibrary::SpawnActorIntoLevel(World, EditorNoteActorClass, NotesLevelName);
-		if (SpawnedActor)
-		{
-			UE_LOG(LogTemp, Log, TEXT("spawn success"));
-			if (AEditorNoteActor* SpawnedNote = Cast<AEditorNoteActor>(SpawnedActor))
-			{
-				UE_LOG(LogTemp, Log, TEXT("init note"));
-				SpawnedNote->InitNote();
-				Refresh();
-				GEditor->SelectNone(false, true);
-				GEditor->SelectActor(SpawnedNote, true, true, true, true);
-			}
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("no valid subclass"));
-	}
-
-	//UClass* EditorNoteClass = nullptr;
-	//UObject* EditorNoteObject = LoadObject<UObject>(nullptr, *UEditorNotesSettings::GetEditorNoteActorClass());
-	//if (UBlueprint* EditorNoteAsBlueprint = Cast<UBlueprint>(EditorNoteObject))
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("got as bp"));
-	//	EditorNoteClass = EditorNoteAsBlueprint->GeneratedClass;
-	//}
-	//if (EditorNoteClass)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("got class"));
-	//}
-
-	//if (!GConfig)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("no gconfig"));
-	//	return FReply::Handled();
-	//}
-	//FString ValueReceived;
-	//bool r = GConfig->GetString(
-	//	TEXT("Plugins.EditorNotes.General"),
-	//	TEXT("EditorNoteActorClass"),
-	//	ValueReceived,
-	//	GGameIni
-	//);
-	//if (r)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("%s"), *ValueReceived);
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("fail get"));
-	//}
-	//return FReply::Handled();
-
-	//static ConstructorHelpers::FObjectFinder<UBlueprint> BpNote(TEXT("Blueprint'/EditorNotes/BP_EditorNoteActor.BP_EditorNoteActor'"));
-	//if (BpNote.Object)
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("find"));
-	//	UEditorNotesFunctionLibrary::SpawnActorIntoLevel(World, BpNote.Object->GetClass());
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Log, TEXT("no find"));
-	//}
-	
-	//Update the listview
-	//ListViewWidget->RequestListRefresh();
 #endif
-	return FReply::Handled();
 }
 
 FReply SEditorNotesWindowWidget::Refresh()
 {
 #if WITH_EDITOR
-	UE_LOG(LogTemp, Log, TEXT("refreshing..."));
+	UE_LOG(LogTemp, Log, TEXT("Refreshing..."));
 
-	if (!GEditor)
+	UWorld* World = GetEditorWorld();
+	if (!World)
 	{
-		UE_LOG(LogTemp, Log, TEXT("no geditor"));
 		return FReply::Handled();
 	}
 
-	FWorldContext& WorldContext = GEditor->GetEditorWorldContext();
-	UWorld* World = WorldContext.World();
-	if (!WorldContext.World())
-	{
-		UE_LOG(LogTemp, Log, TEXT("no worldcontext world"));
-		return FReply::Handled();
-	}
-
+	// Clear and reset list.
 	Items.Empty();
-	
 	for (TActorIterator<AEditorNoteActor> Itr(World); Itr; ++Itr)
 	{
 		if (AEditorNoteActor* Actor = *Itr)
@@ -533,37 +352,121 @@ FReply SEditorNotesWindowWidget::Refresh()
 		}
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("refresh done"));
-	//Update the listview
+	//Update the listview.
 	ListViewWidget->RequestListRefresh();
+	UE_LOG(LogTemp, Log, TEXT("Refresh done."));
 #endif
 	return FReply::Handled();
 }
 
-void SEditorNotesWindowWidget::OnNoteItemSelected(TSharedPtr<FNoteData> Item, ESelectInfo::Type SelectInfo)
+FReply SEditorNotesWindowWidget::OnAddItemButton()
 {
 #if WITH_EDITOR
-	if (!Item.IsValid() || !Item->NoteActor.IsValid()) return;
-
-	TWeakObjectPtr<AEditorNoteActor> Actor = Item->NoteActor;
-	UE_LOG(LogTemp, Log, TEXT("selected %s"), *Actor->GetName());
-
-	if (GEditor)
+	UE_LOG(LogTemp, Log, TEXT("Adding Note..."));
+	UWorld* World = GetEditorWorld();
+	if (!World)
 	{
-		GEditor->SelectNone(false, true);
-		GEditor->SelectActor(Actor.Get(), true, true, true, true);
-		GEditor->MoveViewportCamerasToActor(*Actor.Get(), true);
+		return FReply::Handled();
 	}
-#endif
-}
 
-FReply SEditorNotesWindowWidget::QuitGameClicked()
-{
-#if WITH_EDITOR
-	if (GEngine)
+	TSubclassOf<AEditorNoteActor> EditorNoteActorClass = UEditorNotesSettings::GetEditorNoteActorClass();
+	if (EditorNoteActorClass.Get())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("QuitGameClicked"));
+		FString NotesLevelName = UEditorNotesSettings::GetNotesLevelName();
+		if (!NotesLevelName.IsEmpty())
+		{
+			const FString PersistentLevelName = UGameplayStatics::GetCurrentLevelName(World);
+			UE_LOG(LogTemp, Log, TEXT("Persistent level name: %s"), *PersistentLevelName);
+			NotesLevelName = PersistentLevelName + NotesLevelName;
+		}
+
+		// Create Note actor, then select it. Don't focus to it cause that would be annoying.
+		UE_LOG(LogTemp, Log, TEXT("Adding Note to level: %s"), *NotesLevelName);
+		if (AEditorNoteActor* SpawnedNote = Cast<AEditorNoteActor>(SpawnActorIntoLevel(EditorNoteActorClass, NotesLevelName)))
+		{
+			SpawnedNote->InitNote();
+			Refresh();
+			GEditor->SelectNone(false, true);
+			GEditor->SelectActor(SpawnedNote, true, true, true, true);
+			UE_LOG(LogTemp, Log, TEXT("Note created."));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to create Note."));
+			return FReply::Handled();
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("EditorNoteActor has invalid/missing type."));
+		return FReply::Handled();
 	}
 #endif
 	return FReply::Handled();
+}
+
+AActor* SEditorNotesWindowWidget::SpawnActorIntoLevel(TSubclassOf<AActor> ActorClass, FString LevelName, FVector Location, FRotator Rotation)
+{
+	if (!ActorClass) return nullptr;
+
+	UWorld* const World = GetEditorWorld();
+	if (!World) return nullptr;
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParameters.bDeferConstruction = false;
+
+	//Get Level from Name
+	ULevel* FoundLevel = nullptr;
+
+	if (!LevelName.IsEmpty())
+	{
+		for (const ULevelStreaming* EachLevel : World->StreamingLevels)
+		{
+			if (!EachLevel) continue;
+			ULevel* LevelPtr = EachLevel->GetLoadedLevel();
+			if (!LevelPtr) continue;
+
+			const FString PackageName = EachLevel->GetWorldAssetPackageName();
+			TArray<FString> Tokens;
+			const TCHAR delim = '/'; // TODO: Make platform independent
+			PackageName.ParseIntoArray(Tokens, &delim);
+			if (Tokens.Num() > 0 && Tokens.Last().Equals(LevelName))
+			{
+				FoundLevel = LevelPtr;
+				break;
+			}
+		}
+	}
+	else
+	{
+		FoundLevel = World->PersistentLevel;
+	}
+
+	if (!FoundLevel)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn actor in level \"%s\". Level not found."), *LevelName);
+		return nullptr;
+	}
+
+	SpawnParameters.OverrideLevel = FoundLevel;
+	return World->SpawnActor(ActorClass, &Location, &Rotation, SpawnParameters);
+}
+
+UWorld* SEditorNotesWindowWidget::GetEditorWorld()
+{
+	if (!GEditor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No GEditor."));
+		return nullptr;
+	}
+
+	FWorldContext& WorldContext = GEditor->GetEditorWorldContext();
+	UWorld* World = WorldContext.World();
+	if (!WorldContext.World())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No GEditor WorldContext."));
+		return nullptr;
+	}
+	return World;
 }

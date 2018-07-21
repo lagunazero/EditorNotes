@@ -1,15 +1,10 @@
-// Copyright 2015 Moritz Wundke. All Rights Reserved.
-// Released under MIT.
- 
 #include "EditorNotesSettings.h"
-#include "EditorNotes.h"
 #include "EditorNoteActor.h"
 
-UEditorNotesSettings::UEditorNotesSettings(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+UEditorNotesSettings::UEditorNotesSettings(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
- 
 }
-
 
 TSubclassOf<AEditorNoteActor>  UEditorNotesSettings::GetEditorNoteActorClass()
 {

@@ -14,6 +14,9 @@ enum class ENotePrioType : uint8
 	NPT_COMMENT  UMETA(DisplayName = "Comment"),
 };
 
+/**
+ * The actor that gets placed in the scenes. Should not get added manually, only using the plugin's means.
+ */
 UCLASS(Abstract, Blueprintable, Config = EditorNotes, AutoExpandCategories = (EditorNotes))
 class EDITORNOTES_API AEditorNoteActor : public AActor
 {
@@ -23,9 +26,9 @@ public:
 	AEditorNoteActor();
 
 	virtual void Tick(float DeltaSeconds) override;
+	// Allow tick in editor, for auto-rotation.
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 
-	UFUNCTION(BlueprintCallable, meta = (CallInEditor = "true"))
 	void InitNote();
 	void ResetDate();
 	void ResetUser();
@@ -36,18 +39,22 @@ public:
 
 	FString PrioAsString() const;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UWidgetComponent* Widget;
-
+	// Any opinions on the level? Put those thoughts here!
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Text = "";
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString Creator = "";
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	FDateTime Date = FDateTime();
-
+	// The note's priority.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ENotePrioType Prio;
+	// If this note has been resolved.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bResolved = false;
+
+	// The name of the creator of this note. Automatically set on creation.
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString Creator = "";
+	// The date this note was created. Automatically set on creation.
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FDateTime Date = FDateTime();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bLevelDesign = false;
@@ -62,6 +69,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDesign = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bResolved = false;
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UWidgetComponent* Widget;
 };

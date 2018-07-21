@@ -7,52 +7,47 @@ class AEditorNoteActor;
 struct FNoteData
 {
 	TWeakObjectPtr<AEditorNoteActor> NoteActor;
+	
+	typedef TSharedPtr<FNoteData> Ptr;
 };
 
-struct FNoteRow
-{
-	FString Name;
-	FString Date;
-	FString Prio;
-	FString Resolved;
-};
-
-// Lays out and controls the Main Menu UI for our tutorial.
+/**
+ * Handles the window widget and all interaction with it.
+ */
 class /*EDITORNOTES_API*/ SEditorNotesWindowWidget : public SCompoundWidget
 {
  
 public:
 	SLATE_BEGIN_ARGS(SEditorNotesWindowWidget)
 	{}
-	// SLATE_ARGUMENT(TWeakObjectPtr<class AMainMenuHUD>, MainMenuHUD)
 	SLATE_END_ARGS()
- 
-        // Constructs and lays out the Main Menu UI Widget.
-        // args Arguments structure that contains widget-specific setup information.
+
 	void Construct(const FArguments& args);
  
-	// Click handler for the Play Game! button – Calls MenuHUD’s PlayGameClicked() event.
-	FReply OnAddItemButton();
-	FReply Refresh();
+protected:
 
-	void OnNoteItemSelected(TSharedPtr<FNoteData> Item, ESelectInfo::Type SelectInfo);
-	EColumnSortMode::Type GetColumnSortMode(const FName& ColumnId) const;
+	// List functions.
+	TSharedRef<ITableRow> OnGenerateRowForList(FNoteData::Ptr Item, const TSharedRef<STableViewBase>& OwnerTable);
 	void OnRowSorted(EColumnSortPriority::Type SortPrioType, const FName& ColumnName, EColumnSortMode::Type SortModeType);
+	void OnNoteItemSelected(FNoteData::Ptr Item, ESelectInfo::Type SelectInfo);
 
-	// Click handler for the Quit Game button – Calls MenuHUD’s QuitGameClicked() event.
-	FReply QuitGameClicked();
- 
-	TSharedRef<ITableRow> OnGenerateRowForList(TSharedPtr<FNoteData> Item, const TSharedRef<STableViewBase>& OwnerTable);
+	// Button functions.
+	FReply Refresh();
+	FReply OnAddItemButton();
 
-	TArray<TSharedPtr<FNoteData>> Items;
-	TSharedPtr< SListView< TSharedPtr<FNoteData> > > ListViewWidget;
+	// Helper functions.
+	AActor* SpawnActorIntoLevel(TSubclassOf<AActor> ActorClass, FString LevelName = "", FVector Location = FVector::ZeroVector, FRotator Rotation = FRotator::ZeroRotator);
+	UWorld* GetEditorWorld();
 
+	TArray<FNoteData::Ptr> Items;
+	TSharedPtr< SListView<FNoteData::Ptr> > ListViewWidget;
+
+	// TODO: Storing/using sorting order like this doesn't work quite the way I want it to.
+	// The arrows showing sort direction don't show.
+	// The current implementation also doesn't handle "primary" and "secondary" column wrt sorting.
 	TAttribute<EColumnSortMode::Type> NameSortMode;
 	TAttribute<EColumnSortMode::Type> TextSortMode;
 	TAttribute<EColumnSortMode::Type> DateSortMode;
 	TAttribute<EColumnSortMode::Type> PrioSortMode;
 	TAttribute<EColumnSortMode::Type> ResolvedSortMode;
-
-        // Stores a weak reference to the HUD controlling this class.
-	// TWeakObjectPtr<class AMainMenuHUD> MainMenuHUD;
 };

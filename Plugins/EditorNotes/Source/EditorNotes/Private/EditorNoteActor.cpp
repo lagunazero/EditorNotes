@@ -16,27 +16,31 @@ void AEditorNoteActor::Tick(float DeltaSeconds)
 
 	UpdateText();
 
-	// Rotate to editor camera.
+	// Rotate to camera.
 	if (UWorld* World = GetWorld())
 	{
 		if (World->WorldType == EWorldType::Editor)
 		{
+			// Get editor camera.
 			if (GEditor)
 			{
-				if (FEditorViewportClient* ViewportClient = (FEditorViewportClient*)GEditor->GetActiveViewport()->GetClient())
+				if (FViewport* Viewport = GEditor->GetActiveViewport())
 				{
-					SetActorRotation((ViewportClient->GetViewLocation() - GetActorLocation()).Rotation());
+					if (FEditorViewportClient* ViewportClient = (FEditorViewportClient*)Viewport->GetClient())
+					{
+						SetActorRotation((ViewportClient->GetViewLocation() - GetActorLocation()).Rotation());
+					}
 				}
 			}
 		}
-		else if (World->WorldType == EWorldType::PIE)
-		{
-			UE_LOG(LogTemp, Log, TEXT("PIE"));
-		}
-		else if (World->WorldType == EWorldType::Game)
-		{
-			UE_LOG(LogTemp, Log, TEXT("Game"));
-		}
+		//else if (World->WorldType == EWorldType::PIE)
+		//{
+		//	UE_LOG(LogTemp, Log, TEXT("PIE"));
+		//}
+		//else if (World->WorldType == EWorldType::Game)
+		//{
+		//	UE_LOG(LogTemp, Log, TEXT("Game"));
+		//}
 	}
 }
 
@@ -60,8 +64,9 @@ void AEditorNoteActor::ResetUser()
 void AEditorNoteActor::ResetPosition()
 {
 	if (!GEditor) return;
-
-	FEditorViewportClient* ViewportClient = (FEditorViewportClient*)GEditor->GetActiveViewport()->GetClient();
+	const FViewport* Viewport = GEditor->GetActiveViewport();
+	if (!Viewport) return;
+	const FEditorViewportClient* ViewportClient = (FEditorViewportClient*)Viewport->GetClient();
 	if (!ViewportClient) return;
 
 	const FVector EditorCameraLocation = ViewportClient->GetViewLocation();
