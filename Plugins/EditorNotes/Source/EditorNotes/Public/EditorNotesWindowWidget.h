@@ -45,7 +45,7 @@ protected:
 	// TODO: Storing/using sorting order like this doesn't work quite the way I want it to.
 	// The arrows showing sort direction don't show.
 	// The current implementation also doesn't handle "primary" and "secondary" column wrt sorting.
-	TAttribute<EColumnSortMode::Type> NameSortMode;
+	TAttribute<EColumnSortMode::Type> TitleSortMode;
 	TAttribute<EColumnSortMode::Type> TextSortMode;
 	TAttribute<EColumnSortMode::Type> DateSortMode;
 	TAttribute<EColumnSortMode::Type> PrioSortMode;

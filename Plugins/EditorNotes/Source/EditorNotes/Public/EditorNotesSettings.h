@@ -26,10 +26,6 @@ public:
 	UPROPERTY(config, EditAnywhere, Category = "General")
 	FString NotesLevelName;
 
-	static const FScrollBoxStyle& GetWidgetListStyle();
-	UPROPERTY(config, EditAnywhere, Category = "General")
-	FScrollBoxStyle WidgetListStyle;
-
 	/*
 	// Sample bool property
 	UPROPERTY(EditAnywhere, config, Category = Custom)

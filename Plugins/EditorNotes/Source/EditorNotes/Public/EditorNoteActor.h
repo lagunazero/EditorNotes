@@ -26,7 +26,7 @@ public:
 	AEditorNoteActor();
 
 	virtual void Tick(float DeltaSeconds) override;
-	// Allow tick in editor, for auto-rotation.
+	// Allow tick in editor, for auto-rotation and widget content updating.
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 
 	void InitNote();
@@ -39,34 +39,37 @@ public:
 
 	FString PrioAsString() const;
 
+	// Name of the note. If blank, the widget shows the actor's name instead.
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	FString Title = "";
 	// Any opinions on the level? Put those thoughts here!
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	FString Text = "";
 	// The note's priority.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	ENotePrioType Prio;
 	// If this note has been resolved.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bResolved = false;
 
 	// The name of the creator of this note. Automatically set on creation.
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 	FString Creator = "";
 	// The date this note was created. Automatically set on creation.
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite)
 	FDateTime Date = FDateTime();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bLevelDesign = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bArt = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bAudio = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bCode = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bWriting = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bDesign = false;
 
 protected:

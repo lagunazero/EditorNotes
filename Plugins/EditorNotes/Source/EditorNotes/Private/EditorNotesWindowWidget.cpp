@@ -7,7 +7,7 @@
 
 namespace
 {
-	const FName ListHeaderName = "Name";
+	const FName ListHeaderName = "Title";
 	const FName ListHeaderDate = "Date";
 	const FName ListHeaderPrio = "Prio";
 	const FName ListHeaderText = "Text";
@@ -39,9 +39,9 @@ struct FCompareItemsBase
 	}
 };
 
-struct FCompareItemsByName : FCompareItemsBase
+struct FCompareItemsByTitle : FCompareItemsBase
 {
-	FCompareItemsByName(EColumnSortMode::Type SortMode)
+	FCompareItemsByTitle(EColumnSortMode::Type SortMode)
 	: FCompareItemsBase(SortMode)
 	{
 	}
@@ -175,7 +175,7 @@ void SEditorNotesWindowWidget::Construct(const FArguments& args)
 							SNew(SHeaderRow)
 							+ SHeaderRow::Column(ListHeaderName)
 							.DefaultLabel(FText::FromName(ListHeaderName))
-							.SortMode(NameSortMode)
+							.SortMode(TitleSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
 							+ SHeaderRow::Column(ListHeaderText)
 							.DefaultLabel(FText::FromName(ListHeaderText))
@@ -226,7 +226,11 @@ TSharedRef<ITableRow> SEditorNotesWindowWidget::OnGenerateRowForList(FNoteData::
 			FString ItemText = "";
 			if (ColumnName.IsEqual(ListHeaderName))
 			{
-				ItemText = Item->NoteActor->GetName();
+				ItemText = Item->NoteActor->Title;
+				if (ItemText.IsEmpty())
+				{
+					ItemText = Item->NoteActor->GetName();
+				}
 			}
 			else if (ColumnName.IsEqual(ListHeaderText))
 			{
@@ -265,11 +269,11 @@ void SEditorNotesWindowWidget::OnRowSorted(EColumnSortPriority::Type SortPrio, c
 	// Flip ascending/descending order depending on the most recent order in the clicked column.
 	if (ColumnName.IsEqual(ListHeaderName))
 	{
-		EColumnSortMode::Type NewSortMode = (NameSortMode.Get() == EColumnSortMode::Ascending)
+		EColumnSortMode::Type NewSortMode = (TitleSortMode.Get() == EColumnSortMode::Ascending)
 			? EColumnSortMode::Descending
 			: EColumnSortMode::Ascending;
-		NameSortMode.Set(NewSortMode);
-		Items.Sort(FCompareItemsByName(NewSortMode));
+		TitleSortMode.Set(NewSortMode);
+		Items.Sort(FCompareItemsByTitle(NewSortMode));
 	}
 	else if (ColumnName.IsEqual(ListHeaderText))
 	{

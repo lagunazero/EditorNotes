@@ -17,9 +17,3 @@ FString UEditorNotesSettings::GetNotesLevelName()
 	UEditorNotesSettings* EditorNotesSettings = Cast<UEditorNotesSettings>(UEditorNotesSettings::StaticClass()->GetDefaultObject());
 	return EditorNotesSettings->NotesLevelName;
 }
-
-const FScrollBoxStyle& UEditorNotesSettings::GetWidgetListStyle()
-{
-	UEditorNotesSettings* EditorNotesSettings = Cast<UEditorNotesSettings>(UEditorNotesSettings::StaticClass()->GetDefaultObject());
-	return EditorNotesSettings->WidgetListStyle;
-}
