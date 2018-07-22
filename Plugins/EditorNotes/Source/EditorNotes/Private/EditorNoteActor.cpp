@@ -77,7 +77,7 @@ void AEditorNoteActor::ResetPosition()
 	SetActorRotation(FRotator(EditorCameraRotation.Pitch + 180.f, EditorCameraRotation.Yaw, EditorCameraRotation.Roll + 180.f));
 }
 
-FString AEditorNoteActor::PrioAsString() const
+FString AEditorNoteActor::GetPrioAsString() const
 {
 	switch (Prio)
 	{

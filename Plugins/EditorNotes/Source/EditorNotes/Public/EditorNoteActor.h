@@ -37,7 +37,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, meta = (CallInEditor = "true"))
 	void UpdateText();
 
-	FString PrioAsString() const;
+	UFUNCTION(BlueprintCallable)
+	FString GetPrioAsString() const;
 
 	// Name of the note. If blank, the widget shows the actor's name instead.
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
@@ -53,10 +54,10 @@ public:
 	bool bResolved = false;
 
 	// The name of the creator of this note. Automatically set on creation.
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FString Creator = "";
 	// The date this note was created. Automatically set on creation.
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FDateTime Date = FDateTime();
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)

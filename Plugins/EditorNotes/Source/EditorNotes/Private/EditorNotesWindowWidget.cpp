@@ -242,7 +242,7 @@ TSharedRef<ITableRow> SEditorNotesWindowWidget::OnGenerateRowForList(FNoteData::
 			}
 			else if (ColumnName.IsEqual(ListHeaderPrio))
 			{
-				ItemText = Item->NoteActor->PrioAsString();
+				ItemText = Item->NoteActor->GetPrioAsString();
 			}
 			else if (ColumnName.IsEqual(ListHeaderResolved))
 			{
