@@ -12,6 +12,12 @@ namespace
 	const FName ListHeaderPrio = "Prio";
 	const FName ListHeaderText = "Text";
 	const FName ListHeaderResolved = "Resolved";
+	const FName ListHeaderLabelArt = "Art";
+	const FName ListHeaderLabelCode = "Code";
+	const FName ListHeaderLabelDesign = "Design";
+	const FName ListHeaderLabelLD = "LD";
+	const FName ListHeaderLabelWriting = "Writing";
+	const FName ListHeaderLabelAudio = "Audio";
 }
 
 // One comparison struct per column in the note list.
@@ -114,6 +120,96 @@ struct FCompareItemsByResolved : FCompareItemsBase
 	}
 };
 
+struct FCompareItemsByLabelArt : FCompareItemsBase
+{
+	FCompareItemsByLabelArt(EColumnSortMode::Type SortMode)
+		: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->bArt > B->NoteActor->bArt)
+			: (A->NoteActor->bArt < B->NoteActor->bArt);
+	}
+};
+
+struct FCompareItemsByLabelCode : FCompareItemsBase
+{
+	FCompareItemsByLabelCode(EColumnSortMode::Type SortMode)
+		: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->bCode > B->NoteActor->bCode)
+			: (A->NoteActor->bCode < B->NoteActor->bCode);
+	}
+};
+
+struct FCompareItemsByLabelDesign : FCompareItemsBase
+{
+	FCompareItemsByLabelDesign(EColumnSortMode::Type SortMode)
+		: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->bDesign > B->NoteActor->bDesign)
+			: (A->NoteActor->bDesign < B->NoteActor->bDesign);
+	}
+};
+
+struct FCompareItemsByLabelLD : FCompareItemsBase
+{
+	FCompareItemsByLabelLD(EColumnSortMode::Type SortMode)
+		: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->bLD > B->NoteActor->bLD)
+			: (A->NoteActor->bLD < B->NoteActor->bLD);
+	}
+};
+
+struct FCompareItemsByLabelWriting : FCompareItemsBase
+{
+	FCompareItemsByLabelWriting(EColumnSortMode::Type SortMode)
+		: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->bWriting > B->NoteActor->bWriting)
+			: (A->NoteActor->bWriting < B->NoteActor->bWriting);
+	}
+};
+
+struct FCompareItemsByLabelAudio : FCompareItemsBase
+{
+	FCompareItemsByLabelAudio(EColumnSortMode::Type SortMode)
+		: FCompareItemsBase(SortMode)
+	{
+	}
+
+	virtual bool Compare(const FNoteData::Ptr A, const FNoteData::Ptr B) const override
+	{
+		return SortMode == EColumnSortMode::Descending
+			? (A->NoteActor->bAudio > B->NoteActor->bAudio)
+			: (A->NoteActor->bAudio < B->NoteActor->bAudio);
+	}
+};
+
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SEditorNotesWindowWidget::Construct(const FArguments& args)
 {
@@ -173,25 +269,60 @@ void SEditorNotesWindowWidget::Construct(const FArguments& args)
 						.HeaderRow
 						(
 							SNew(SHeaderRow)
+
 							+ SHeaderRow::Column(ListHeaderName)
 							.DefaultLabel(FText::FromName(ListHeaderName))
 							.SortMode(TitleSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
+
 							+ SHeaderRow::Column(ListHeaderText)
 							.DefaultLabel(FText::FromName(ListHeaderText))
 							.SortMode(TextSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
+
 							+SHeaderRow::Column(ListHeaderDate)
 							.DefaultLabel(FText::FromName(ListHeaderDate))
 							.SortMode(DateSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
+
 							+ SHeaderRow::Column(ListHeaderPrio)
 							.DefaultLabel(FText::FromName(ListHeaderPrio))
 							.SortMode(PrioSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
+
 							+ SHeaderRow::Column(ListHeaderResolved)
 							.DefaultLabel(FText::FromName(ListHeaderResolved))
 							.SortMode(ResolvedSortMode)
+							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
+
+							+ SHeaderRow::Column(ListHeaderLabelArt)
+							.DefaultLabel(FText::FromName(ListHeaderLabelArt))
+							.SortMode(LabelArtSortMode)
+							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
+
+							+ SHeaderRow::Column(ListHeaderLabelCode)
+							.DefaultLabel(FText::FromName(ListHeaderLabelCode))
+							.SortMode(LabelCodeSortMode)
+							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
+
+							+ SHeaderRow::Column(ListHeaderLabelDesign)
+							.DefaultLabel(FText::FromName(ListHeaderLabelDesign))
+							.SortMode(LabelDesignSortMode)
+							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
+
+							+ SHeaderRow::Column(ListHeaderLabelLD)
+							.DefaultLabel(FText::FromName(ListHeaderLabelLD))
+							.SortMode(LabelLDSortMode)
+							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
+
+							+ SHeaderRow::Column(ListHeaderLabelWriting)
+							.DefaultLabel(FText::FromName(ListHeaderLabelWriting))
+							.SortMode(LabelWritingSortMode)
+							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
+
+							+ SHeaderRow::Column(ListHeaderLabelAudio)
+							.DefaultLabel(FText::FromName(ListHeaderLabelAudio))
+							.SortMode(LabelAudioSortMode)
 							.OnSort(this, &SEditorNotesWindowWidget::OnRowSorted)
 						)
 					]
@@ -247,6 +378,30 @@ TSharedRef<ITableRow> SEditorNotesWindowWidget::OnGenerateRowForList(FNoteData::
 			else if (ColumnName.IsEqual(ListHeaderResolved))
 			{
 				ItemText = Item->NoteActor->bResolved ? "X" : FString();
+			}
+			else if (ColumnName.IsEqual(ListHeaderLabelArt))
+			{
+				ItemText = Item->NoteActor->bArt ? "X" : FString();
+			}
+			else if (ColumnName.IsEqual(ListHeaderLabelCode))
+			{
+				ItemText = Item->NoteActor->bCode ? "X" : FString();
+			}
+			else if (ColumnName.IsEqual(ListHeaderLabelDesign))
+			{
+				ItemText = Item->NoteActor->bDesign ? "X" : FString();
+			}
+			else if (ColumnName.IsEqual(ListHeaderLabelLD))
+			{
+				ItemText = Item->NoteActor->bLD ? "X" : FString();
+			}
+			else if (ColumnName.IsEqual(ListHeaderLabelWriting))
+			{
+				ItemText = Item->NoteActor->bWriting ? "X" : FString();
+			}
+			else if (ColumnName.IsEqual(ListHeaderLabelAudio))
+			{
+				ItemText = Item->NoteActor->bAudio ? "X" : FString();
 			}
 			else
 			{
@@ -306,6 +461,54 @@ void SEditorNotesWindowWidget::OnRowSorted(EColumnSortPriority::Type SortPrio, c
 			: EColumnSortMode::Ascending;
 		ResolvedSortMode.Set(NewSortMode);
 		Items.Sort(FCompareItemsByResolved(NewSortMode));
+	}
+	else if (ColumnName.IsEqual(ListHeaderLabelArt))
+	{
+		EColumnSortMode::Type NewSortMode = (LabelArtSortMode.Get() == EColumnSortMode::Ascending)
+			? EColumnSortMode::Descending
+			: EColumnSortMode::Ascending;
+		LabelArtSortMode.Set(NewSortMode);
+		Items.Sort(FCompareItemsByLabelArt(NewSortMode));
+	}
+	else if (ColumnName.IsEqual(ListHeaderLabelCode))
+	{
+		EColumnSortMode::Type NewSortMode = (LabelCodeSortMode.Get() == EColumnSortMode::Ascending)
+			? EColumnSortMode::Descending
+			: EColumnSortMode::Ascending;
+		LabelCodeSortMode.Set(NewSortMode);
+		Items.Sort(FCompareItemsByLabelCode(NewSortMode));
+	}
+	else if (ColumnName.IsEqual(ListHeaderLabelDesign))
+	{
+		EColumnSortMode::Type NewSortMode = (LabelDesignSortMode.Get() == EColumnSortMode::Ascending)
+			? EColumnSortMode::Descending
+			: EColumnSortMode::Ascending;
+		LabelDesignSortMode.Set(NewSortMode);
+		Items.Sort(FCompareItemsByLabelDesign(NewSortMode));
+	}
+	else if (ColumnName.IsEqual(ListHeaderLabelLD))
+	{
+		EColumnSortMode::Type NewSortMode = (LabelLDSortMode.Get() == EColumnSortMode::Ascending)
+			? EColumnSortMode::Descending
+			: EColumnSortMode::Ascending;
+		LabelLDSortMode.Set(NewSortMode);
+		Items.Sort(FCompareItemsByLabelLD(NewSortMode));
+	}
+	else if (ColumnName.IsEqual(ListHeaderLabelWriting))
+	{
+		EColumnSortMode::Type NewSortMode = (LabelWritingSortMode.Get() == EColumnSortMode::Ascending)
+			? EColumnSortMode::Descending
+			: EColumnSortMode::Ascending;
+		LabelWritingSortMode.Set(NewSortMode);
+		Items.Sort(FCompareItemsByLabelWriting(NewSortMode));
+	}
+	else if (ColumnName.IsEqual(ListHeaderLabelAudio))
+	{
+		EColumnSortMode::Type NewSortMode = (LabelAudioSortMode.Get() == EColumnSortMode::Ascending)
+			? EColumnSortMode::Descending
+			: EColumnSortMode::Ascending;
+		LabelAudioSortMode.Set(NewSortMode);
+		Items.Sort(FCompareItemsByLabelAudio(NewSortMode));
 	}
 	else
 	{
@@ -425,7 +628,7 @@ AActor* SEditorNotesWindowWidget::SpawnActorIntoLevel(TSubclassOf<AActor> ActorC
 
 	if (!LevelName.IsEmpty())
 	{
-		for (const ULevelStreaming* EachLevel : World->StreamingLevels)
+		for (const ULevelStreaming* EachLevel : World->GetStreamingLevels())
 		{
 			if (!EachLevel) continue;
 			ULevel* LevelPtr = EachLevel->GetLoadedLevel();

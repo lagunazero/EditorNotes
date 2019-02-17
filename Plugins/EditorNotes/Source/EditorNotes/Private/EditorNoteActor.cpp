@@ -17,30 +17,37 @@ void AEditorNoteActor::Tick(float DeltaSeconds)
 	UpdateText();
 
 	// Rotate to camera.
-	if (UWorld* World = GetWorld())
+	if (UEditorNotesSettings::GetAutoRotate())
 	{
-		if (World->WorldType == EWorldType::Editor)
+		if (UWorld* World = GetWorld())
 		{
-			// Get editor camera.
-			if (GEditor)
+			if (World->WorldType == EWorldType::Editor)
 			{
-				if (FViewport* Viewport = GEditor->GetActiveViewport())
+				// Get editor camera.
+				if (GEditor)
 				{
-					if (FEditorViewportClient* ViewportClient = (FEditorViewportClient*)Viewport->GetClient())
+					if (FViewport* Viewport = GEditor->GetActiveViewport())
 					{
-						SetActorRotation((ViewportClient->GetViewLocation() - GetActorLocation()).Rotation());
+						if (FEditorViewportClient* ViewportClient = (FEditorViewportClient*)Viewport->GetClient())
+						{
+							SetActorRotation((ViewportClient->GetViewLocation() - GetActorLocation()).Rotation());
+						}
 					}
 				}
 			}
+			//else if (World->WorldType == EWorldType::PIE)
+			//{
+			//	UE_LOG(LogTemp, Log, TEXT("PIE"));
+			//}
+			//else if (World->WorldType == EWorldType::Game)
+			//{
+			//	UE_LOG(LogTemp, Log, TEXT("Game"));
+			//}
 		}
-		//else if (World->WorldType == EWorldType::PIE)
-		//{
-		//	UE_LOG(LogTemp, Log, TEXT("PIE"));
-		//}
-		//else if (World->WorldType == EWorldType::Game)
-		//{
-		//	UE_LOG(LogTemp, Log, TEXT("Game"));
-		//}
+	}
+	else
+	{
+		SetActorRotation(FQuat());
 	}
 }
 

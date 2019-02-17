@@ -50,4 +50,10 @@ protected:
 	TAttribute<EColumnSortMode::Type> DateSortMode;
 	TAttribute<EColumnSortMode::Type> PrioSortMode;
 	TAttribute<EColumnSortMode::Type> ResolvedSortMode;
+	TAttribute<EColumnSortMode::Type> LabelArtSortMode;
+	TAttribute<EColumnSortMode::Type> LabelCodeSortMode;
+	TAttribute<EColumnSortMode::Type> LabelDesignSortMode;
+	TAttribute<EColumnSortMode::Type> LabelLDSortMode;
+	TAttribute<EColumnSortMode::Type> LabelWritingSortMode;
+	TAttribute<EColumnSortMode::Type> LabelAudioSortMode;
 };

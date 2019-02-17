@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "EditorNotesSettings.h"
 #include "EditorNoteActor.generated.h"
 
 class UWidgetComponent;
@@ -61,17 +62,19 @@ public:
 	FDateTime Date = FDateTime();
 
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-	bool bLevelDesign = false;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bArt = false;
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-	bool bAudio = false;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bCode = false;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	bool bDesign = false;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	bool bLD = false;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bWriting = false;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-	bool bDesign = false;
+	bool bAudio = false;
+	//UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	//TArray<FLabelData> Labels;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
