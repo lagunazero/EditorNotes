@@ -1,6 +1,7 @@
 #pragma once
  
 #include "Styling/SlateTypes.h"
+#include "Math/Color.h"
 #include "EditorNotesSettings.generated.h"
 
 class AEditorNoteActor;
@@ -36,17 +37,45 @@ class UEditorNotesSettings : public UObject
 public:
 	UEditorNotesSettings(const FObjectInitializer& ObjectInitializer);
  
+	// The class the notes are using.
 	static TSubclassOf<AEditorNoteActor> GetEditorNoteActorClass();
+	// The class the notes are using.
 	UPROPERTY(config, EditAnywhere, Category = "General")
 	TSubclassOf<AEditorNoteActor> EditorNoteActorClass;
 
+	// If not empty, notes are automatically added to this level. Intention is that notes are stored in a separate level layer to avoid disrupting level version control locking. Leave empty to place in persistent level.
 	static FString GetNotesLevelName();
+	// If not empty, notes are automatically added to this level. Intention is that notes are stored in a separate level layer to avoid disrupting level version control locking. Leave empty to place in persistent level.
 	UPROPERTY(config, EditAnywhere, Category = "General")
 	FString NotesLevelName;
 
+	// If all notes should be constantly facing the camera.
 	static bool GetAutoRotate();
+	// If all notes should be constantly facing the camera.
 	UPROPERTY(config, EditAnywhere, Category = "General")
 	bool bAutoRotate = true;
+
+	// Color of lines to related actors.
+	static FColor GetRelatedActorLineColor();
+	// Color of lines to related actors.
+	UPROPERTY(config, EditAnywhere, Category = "General")
+	FColor RelatedActorLineColor = FColor(0.5f, 0.5f, 0.5f);
+	// Color of line border to related actors.
+	static FColor GetRelatedActorLineColorBorder();
+	// Color of line border to related actors.
+	UPROPERTY(config, EditAnywhere, Category = "General")
+	FColor RelatedActorLineColorBorder = FColor(0.1f, 0.1f, 0.1f);
+
+	// Width of lines to related actors.
+	static float GetRelatedActorLineWidth();
+	// Width of lines to related actors.
+	UPROPERTY(config, EditAnywhere, Category = "General", meta = (ClampMin = 0))
+	float RelatedActorLineWidth = 5.f;
+	// Width of line border to related actors.
+	static float GetRelatedActorLineWidthBorder();
+	// Width of line border to related actors.
+	UPROPERTY(config, EditAnywhere, Category = "General", meta = (ClampMin = 0))
+	float RelatedActorLineWidthBorder = 1.f;
 
 	// TODO: Not used yet
 	static TArray<FLabelData> GetEditorNoteLabels();

@@ -26,6 +26,7 @@ class EDITORNOTES_API AEditorNoteActor : public AActor
 public:
 	AEditorNoteActor();
 
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	// Allow tick in editor, for auto-rotation and widget content updating.
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
@@ -35,8 +36,13 @@ public:
 	void ResetUser();
 	void ResetPosition();
 
+	void ShowRelatedActors();
+	void AutoRotate();
+
 	UFUNCTION(BlueprintImplementableEvent, meta = (CallInEditor = "true"))
 	void UpdateText();
+	UFUNCTION(BlueprintImplementableEvent, meta = (CallInEditor = "true"))
+	void OnSelectionChange(bool bSelected);
 
 	UFUNCTION(BlueprintCallable)
 	FString GetPrioAsString() const;
@@ -45,7 +51,7 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	FString Title = "";
 	// Any opinions on the level? Put those thoughts here!
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (MultiLine = true))
 	FString Text = "";
 	// The note's priority.
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
@@ -53,6 +59,10 @@ public:
 	// If this note has been resolved.
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bResolved = false;
+
+	// Connect any actors related to this note. Will show lines to them when note is selected.
+	UPROPERTY(EditInstanceOnly)
+	TArray<TSoftObjectPtr<AActor> > RelatedActors;
 
 	// The name of the creator of this note. Automatically set on creation.
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -77,6 +87,13 @@ public:
 	//TArray<FLabelData> Labels;
 
 protected:
+
+	// Root component so widget can be offset.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USceneComponent* Root;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UWidgetComponent* Widget;
+
+	bool bWasSelected = false;
+	bool bHasTicked = false;
 };

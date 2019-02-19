@@ -583,12 +583,16 @@ FReply SEditorNotesWindowWidget::OnAddItemButton()
 		if (!NotesLevelName.IsEmpty())
 		{
 			const FString PersistentLevelName = UGameplayStatics::GetCurrentLevelName(World);
-			UE_LOG(LogTemp, Log, TEXT("Persistent level name: %s"), *PersistentLevelName);
+			//UE_LOG(LogTemp, Log, TEXT("Persistent level name: %s"), *PersistentLevelName);
 			NotesLevelName = PersistentLevelName + NotesLevelName;
+			UE_LOG(LogTemp, Log, TEXT("Adding Note to level: %s"), *NotesLevelName);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Log, TEXT("Adding Note to persistent level."));
 		}
 
 		// Create Note actor, then select it. Don't focus to it cause that would be annoying.
-		UE_LOG(LogTemp, Log, TEXT("Adding Note to level: %s"), *NotesLevelName);
 		if (AEditorNoteActor* SpawnedNote = Cast<AEditorNoteActor>(SpawnActorIntoLevel(EditorNoteActorClass, NotesLevelName)))
 		{
 			SpawnedNote->InitNote();
@@ -628,16 +632,25 @@ AActor* SEditorNotesWindowWidget::SpawnActorIntoLevel(TSubclassOf<AActor> ActorC
 
 	if (!LevelName.IsEmpty())
 	{
+		//UE_LOG(LogTemp, Log, TEXT("Checking %d streaming levels..."), World->GetStreamingLevels().Num());
 		for (const ULevelStreaming* EachLevel : World->GetStreamingLevels())
 		{
 			if (!EachLevel) continue;
+			//UE_LOG(LogTemp, Log, TEXT("ULevelStreaming: %s"), *EachLevel->GetName());
 			ULevel* LevelPtr = EachLevel->GetLoadedLevel();
+			//UE_LOG(LogTemp, Log, TEXT("LevelPtr: %s"), *LevelPtr->GetName());
 			if (!LevelPtr) continue;
 
 			const FString PackageName = EachLevel->GetWorldAssetPackageName();
 			TArray<FString> Tokens;
 			const TCHAR delim = '/'; // TODO: Make platform independent
 			PackageName.ParseIntoArray(Tokens, &delim);
+			//UE_LOG(LogTemp, Log, TEXT("PackageName: %s"), *PackageName);
+			//UE_LOG(LogTemp, Log, TEXT("Tokens: %d"), Tokens.Num());
+			//if (Tokens.Num() > 0)
+			//{
+			//	UE_LOG(LogTemp, Log, TEXT("Token: %s"), *Tokens.Last());
+			//}
 			if (Tokens.Num() > 0 && Tokens.Last().Equals(LevelName))
 			{
 				FoundLevel = LevelPtr;

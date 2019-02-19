@@ -32,6 +32,30 @@ bool UEditorNotesSettings::GetAutoRotate()
 	return EditorNotesSettings->bAutoRotate;
 }
 
+FColor UEditorNotesSettings::GetRelatedActorLineColor()
+{
+	UEditorNotesSettings* EditorNotesSettings = Cast<UEditorNotesSettings>(UEditorNotesSettings::StaticClass()->GetDefaultObject());
+	return EditorNotesSettings->RelatedActorLineColor;
+}
+
+FColor UEditorNotesSettings::GetRelatedActorLineColorBorder()
+{
+	UEditorNotesSettings* EditorNotesSettings = Cast<UEditorNotesSettings>(UEditorNotesSettings::StaticClass()->GetDefaultObject());
+	return EditorNotesSettings->RelatedActorLineColorBorder;
+}
+
+float UEditorNotesSettings::GetRelatedActorLineWidth()
+{
+	UEditorNotesSettings* EditorNotesSettings = Cast<UEditorNotesSettings>(UEditorNotesSettings::StaticClass()->GetDefaultObject());
+	return EditorNotesSettings->RelatedActorLineWidth;
+}
+
+float UEditorNotesSettings::GetRelatedActorLineWidthBorder()
+{
+	UEditorNotesSettings* EditorNotesSettings = Cast<UEditorNotesSettings>(UEditorNotesSettings::StaticClass()->GetDefaultObject());
+	return EditorNotesSettings->RelatedActorLineWidthBorder;
+}
+
 TArray<FLabelData> UEditorNotesSettings::GetEditorNoteLabels()
 {
 	UEditorNotesSettings* EditorNotesSettings = Cast<UEditorNotesSettings>(UEditorNotesSettings::StaticClass()->GetDefaultObject());
