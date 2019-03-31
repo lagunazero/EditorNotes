@@ -1,5 +1,6 @@
 #include "EditorNoteActor.h"
 #include "WidgetComponent.h"
+#include "EditorNoteWidget.h"
 #include "EditorViewportClient.h"
 #include "DrawDebugHelpers.h"
 #include "UnrealEd.h"
@@ -36,6 +37,14 @@ void AEditorNoteActor::Tick(float DeltaSeconds)
 		if (!bWasSelected)
 		{
 			bWasSelected = true;
+			if (IsValid(Widget))
+			{
+				if (UEditorNoteWidget* NoteWidget = Cast<UEditorNoteWidget>(Widget->GetUserWidgetObject()))
+				{
+					NoteWidget->SetSelected(bWasSelected);
+				}
+			}
+			
 			OnSelectionChange(true);
 		}
 
@@ -45,6 +54,13 @@ void AEditorNoteActor::Tick(float DeltaSeconds)
 	else if (bWasSelected)
 	{
 		bWasSelected = false;
+		if (IsValid(Widget))
+		{
+			if (UEditorNoteWidget* NoteWidget = Cast<UEditorNoteWidget>(Widget->GetUserWidgetObject()))
+			{
+				NoteWidget->SetSelected(bWasSelected);
+			}
+		}
 		OnSelectionChange(false);
 	}
 

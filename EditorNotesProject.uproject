@@ -7,7 +7,10 @@
 		{
 			"Name": "EditorNotesProject",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"UMGEditor"
+			]
 		}
 	]
 }

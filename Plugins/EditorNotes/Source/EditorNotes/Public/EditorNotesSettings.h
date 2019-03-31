@@ -49,38 +49,44 @@ public:
 	UPROPERTY(config, EditAnywhere, Category = "General")
 	FString NotesLevelName;
 
-	// If all notes should be constantly facing the camera.
-	static bool GetAutoRotate();
-	// If all notes should be constantly facing the camera.
-	UPROPERTY(config, EditAnywhere, Category = "General")
-	bool bAutoRotate = true;
-
-	// Color of lines to related actors.
-	static FColor GetRelatedActorLineColor();
-	// Color of lines to related actors.
-	UPROPERTY(config, EditAnywhere, Category = "General")
-	FColor RelatedActorLineColor = FColor(0.5f, 0.5f, 0.5f);
-	// Color of line border to related actors.
-	static FColor GetRelatedActorLineColorBorder();
-	// Color of line border to related actors.
-	UPROPERTY(config, EditAnywhere, Category = "General")
-	FColor RelatedActorLineColorBorder = FColor(0.1f, 0.1f, 0.1f);
-
-	// Width of lines to related actors.
-	static float GetRelatedActorLineWidth();
-	// Width of lines to related actors.
-	UPROPERTY(config, EditAnywhere, Category = "General", meta = (ClampMin = 0))
-	float RelatedActorLineWidth = 5.f;
-	// Width of line border to related actors.
-	static float GetRelatedActorLineWidthBorder();
-	// Width of line border to related actors.
-	UPROPERTY(config, EditAnywhere, Category = "General", meta = (ClampMin = 0))
-	float RelatedActorLineWidthBorder = 1.f;
-
 	// TODO: Not used yet
 	static TArray<FLabelData> GetEditorNoteLabels();
 	UPROPERTY(config, EditAnywhere, Category = "General")
 	TArray<FLabelData> Labels;
+
+	// If all notes should be constantly facing the camera.
+	static bool GetAutoRotate();
+	// If all notes should be constantly facing the camera.
+	UPROPERTY(config, EditAnywhere, Category = "Widget")
+	bool bAutoRotate = true;
+
+	// Color of widget background color. Set it here instead of directly in the WBP.
+	static FColor GetBackgroundColor();
+	// Color of widget background color. Set it here instead of directly in the WBP.
+	UPROPERTY(config, EditAnywhere, Category = "Widget")
+	FColor BackgroundColor = FColor(0.57f, 0.57f, 0.57f);
+
+	// Color of lines to related actors.
+	static FColor GetRelatedActorLineColor();
+	// Color of lines to related actors.
+	UPROPERTY(config, EditAnywhere, Category = "Widget")
+	FColor RelatedActorLineColor = FColor(0.57f, 0.57f, 0.57f);
+	// Color of line border to related actors.
+	static FColor GetRelatedActorLineColorBorder();
+	// Color of line border to related actors.
+	UPROPERTY(config, EditAnywhere, Category = "Widget")
+	FColor RelatedActorLineColorBorder = FColor(0.29f, 0.29f, 0.29f);
+
+	// Width of lines to related actors.
+	static float GetRelatedActorLineWidth();
+	// Width of lines to related actors.
+	UPROPERTY(config, EditAnywhere, Category = "Widget", meta = (ClampMin = 0))
+	float RelatedActorLineWidth = 2.f;
+	// Width of line border to related actors.
+	static float GetRelatedActorLineWidthBorder();
+	// Width of line border to related actors.
+	UPROPERTY(config, EditAnywhere, Category = "Widget", meta = (ClampMin = 0))
+	float RelatedActorLineWidthBorder = 2.f;
 
 	/*
 	// Sample bool property

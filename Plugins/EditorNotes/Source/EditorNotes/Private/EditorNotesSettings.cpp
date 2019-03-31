@@ -32,6 +32,12 @@ bool UEditorNotesSettings::GetAutoRotate()
 	return EditorNotesSettings->bAutoRotate;
 }
 
+FColor UEditorNotesSettings::GetBackgroundColor()
+{
+	UEditorNotesSettings* EditorNotesSettings = Cast<UEditorNotesSettings>(UEditorNotesSettings::StaticClass()->GetDefaultObject());
+	return EditorNotesSettings->BackgroundColor;
+}
+
 FColor UEditorNotesSettings::GetRelatedActorLineColor()
 {
 	UEditorNotesSettings* EditorNotesSettings = Cast<UEditorNotesSettings>(UEditorNotesSettings::StaticClass()->GetDefaultObject());
