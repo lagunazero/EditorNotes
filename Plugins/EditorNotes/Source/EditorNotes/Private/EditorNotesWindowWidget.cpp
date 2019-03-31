@@ -569,7 +569,6 @@ FReply SEditorNotesWindowWidget::Refresh()
 FReply SEditorNotesWindowWidget::OnAddItemButton()
 {
 #if WITH_EDITOR
-	UE_LOG(LogTemp, Log, TEXT("Adding Note..."));
 	UWorld* World = GetEditorWorld();
 	if (!World)
 	{
@@ -599,7 +598,7 @@ FReply SEditorNotesWindowWidget::OnAddItemButton()
 			Refresh();
 			GEditor->SelectNone(false, true);
 			GEditor->SelectActor(SpawnedNote, true, true, true, true);
-			UE_LOG(LogTemp, Log, TEXT("Note created."));
+			UE_LOG(LogTemp, Log, TEXT("Note created successfully."));
 		}
 		else
 		{
@@ -632,29 +631,23 @@ AActor* SEditorNotesWindowWidget::SpawnActorIntoLevel(TSubclassOf<AActor> ActorC
 
 	if (!LevelName.IsEmpty())
 	{
-		//UE_LOG(LogTemp, Log, TEXT("Checking %d streaming levels..."), World->GetStreamingLevels().Num());
 		for (const ULevelStreaming* EachLevel : World->GetStreamingLevels())
 		{
-			if (!EachLevel) continue;
-			//UE_LOG(LogTemp, Log, TEXT("ULevelStreaming: %s"), *EachLevel->GetName());
+			if (!IsValid(EachLevel)) continue;
 			ULevel* LevelPtr = EachLevel->GetLoadedLevel();
-			//UE_LOG(LogTemp, Log, TEXT("LevelPtr: %s"), *LevelPtr->GetName());
-			if (!LevelPtr) continue;
+			if (!IsValid(LevelPtr)) continue;
 
 			const FString PackageName = EachLevel->GetWorldAssetPackageName();
 			TArray<FString> Tokens;
-			const TCHAR delim = '/'; // TODO: Make platform independent
-			PackageName.ParseIntoArray(Tokens, &delim);
-			//UE_LOG(LogTemp, Log, TEXT("PackageName: %s"), *PackageName);
-			//UE_LOG(LogTemp, Log, TEXT("Tokens: %d"), Tokens.Num());
-			//if (Tokens.Num() > 0)
-			//{
-			//	UE_LOG(LogTemp, Log, TEXT("Token: %s"), *Tokens.Last());
-			//}
-			if (Tokens.Num() > 0 && Tokens.Last().Equals(LevelName))
+			PackageName.ParseIntoArray(Tokens, TEXT("/")); // TODO: Make platform independent
+			if (Tokens.Num() > 0)
 			{
-				FoundLevel = LevelPtr;
-				break;
+				const FString& LastToken = Tokens.Last();
+				if (LastToken.Equals(LevelName))
+				{
+					FoundLevel = LevelPtr;
+					break;
+				}
 			}
 		}
 	}
@@ -663,7 +656,7 @@ AActor* SEditorNotesWindowWidget::SpawnActorIntoLevel(TSubclassOf<AActor> ActorC
 		FoundLevel = World->PersistentLevel;
 	}
 
-	if (!FoundLevel)
+	if (!IsValid(FoundLevel))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn actor in level \"%s\". Level not found."), *LevelName);
 		return nullptr;
