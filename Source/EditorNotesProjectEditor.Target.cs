@@ -10,6 +10,5 @@ public class EditorNotesProjectEditorTarget : TargetRules
 		Type = TargetType.Editor;
 
 		ExtraModuleNames.AddRange( new string[] { "EditorNotesProject" } );
-		
 	}
 }
